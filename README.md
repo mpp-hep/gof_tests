@@ -1,6 +1,6 @@
 # Goodness-of-fit tests for model-independent searches
 
-This code uses Higgs combine tool via CMSSW
+This code is based on J. Duartes script https://github.com/mpp-hep/JetAnomaly_CHEP19/Simple_combine.ipynb. It uses Higgs combine tool via CMSSW:
 
 ```
 export SCRAM_ARCH=slc7_amd64_gcc700
