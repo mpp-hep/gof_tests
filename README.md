@@ -30,7 +30,7 @@ cmsenv
 cd ../../
 ```
 
-The script contains two almost identical scripts: One Jupyter notebook for illustrative purposes and quick checks, and one python script that can be imported and used in another script
+The script contains two almost identical scripts: One Jupyter notebook for illustrative purposes and quick checks, and one python script that can be imported and used in another script(WIP)
 
 To run the notebook from lxplusABC
 ```
