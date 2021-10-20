@@ -3,8 +3,8 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 
-def doSmoothing(json, qrs = ['01','10','30','50','70','90'], reduceRange=False):
-  f = open(json,)
+def doSmoothing(infile, qrs = ['01','10','30','50','70','90'], reduceRange=False):
+  f = open(infile,)
   qr_unc = json.load(f)
 
   functions= {}
@@ -34,7 +34,7 @@ def doSmoothing(json, qrs = ['01','10','30','50','70','90'], reduceRange=False):
     axs[0].plot(x, y, "o", x, new_y,color="red")
     ratio = y/new_y
     axs[1].plot(x, ratio, "o",color="blue")
-    fig.savefig('smoothQR_{}_qr{}.pdf'.format(json.split('/')[-1].replace('.json',''),qr))
+    fig.savefig('smoothQR_{}_qr{}.pdf'.format(infile.split('/')[-1].replace('.json',''),qr))
 
   for qr in qrs:
     print("{} : np.poly1d({}),".format(1.-float(qr)/100,coeffs[qr]))
