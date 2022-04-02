@@ -11,7 +11,7 @@ from math import log10, floor
 import math
 from subprocess import Popen
 import shlex 
-import cmsstyle
+#import cmsstyle
 
 def makeWS(data_rej,data_acc,signal_rej,signal_acc, outname,quantile,qr_unc_file=None):
   
@@ -153,75 +153,76 @@ def makeWS(data_rej,data_acc,signal_rej,signal_acc, outname,quantile,qr_unc_file
   os.system('combineCards.py rej={REJ} acc={ACC} > {RATIO}'.format(REJ=outname.replace('.root','_rej.txt'),ACC=outname.replace('.root','_acc.txt'),RATIO=outname.replace('.root','_ratio.txt')))
   
 if __name__ == "__main__":
-  # Input: Different signals and trainings with varying amount of injected signal
-  signal  = 'sig_GtoWW35brReco'
-  xsecs   = [0,10,20,40,60,80,100]
-  xsecs   = [0]
+    # Input: Different signals and trainings with varying amount of injected signal
+    signal  = 'sig_GtoWW35naReco'
+    #xsecs   = [0,20,40,60,80,100]
+    xsecs   = [0,100]
+
+    quantiles = [0.7, 0.5, 0.3, 0.1, 0.01]
+
+    doAllQuantiles = True
+    combineAll     = False
+
+    tag = 'PDinj_NA3p5'
+    #hist_file_name = 'histograms_'+tag+'.root'
+    hist_file_name = "histograms_injSig_{}.root".format(tag)
+    f = rt.TFile.Open(hist_file_name,"r")  
+
+    if doAllQuantiles:
   
-  columns = {0.5: 21, 0.1: 18, 0.3: 22, 0.9: 17, 0.7: 20, 0.01: 19}
-  # columns = {0.9: 17, 0.01: 19, 0.1: 18}
-  
-  doAllQuantiles = True
-  combineAll     = False
-  
-  tag = 'PDinj_BR3p5'
-  
-  if doAllQuantiles:
-  
-    for xs in xsecs:
-      print("\nFor xsec={}:".format(xs) )
-      for key in sorted(columns.keys()):
-          print("For q = {}".format(key) )
-          quantile = int(key*100)
-          # Get histograms
-          f = rt.TFile.Open('histograms_GOF_GOF_RSG_WW_na_3500GeV_xs0.root',"r")
-          data_acc = f.Get('data_acc_{}fb_q{}p'.format(xs,quantile)); data_acc.SetDirectory(0);
-          data_rej = f.Get('data_acc_{}fb_q100p'.format(xs)); data_rej.SetDirectory(0);
+        for xs in xsecs:
+            print("\nFor xsec={}:".format(xs) )
+            for key in quantiles:
+              quantile = int(key*100)
+              print("For quantile = {}".format(quantile))
+              # Get histograms
+              data_acc = f.Get('data_acc_{}fb_q{}p'.format(xs,quantile)); data_acc.SetDirectory(0);
+              data_rej = f.Get('data_acc_{}fb_q100p'.format(xs)); data_rej.SetDirectory(0); # TODO: update bottom quantile
 
-          signal_acc     = f.Get('signal_acc_{}fb_q{}p'.format(xs,quantile)); signal_acc.SetDirectory(0);
-          signal_rej     = f.Get('signal_acc_{}fb_q100p'.format(xs)); signal_rej.SetDirectory(0);
-          f.Close()
+              signal_acc     = f.Get('signal_acc_{}fb_q{}p'.format(xs,quantile)); signal_acc.SetDirectory(0);
+              signal_rej     = f.Get('signal_acc_{}fb_q100p'.format(xs)); signal_rej.SetDirectory(0); # TODO: update bottom quantile
+              print('XS={}: SIG PASS = {} SIG FAIL = {} BKG PASS = {} BKG FAIL = {}'.format(xs,signal_acc.Integral(),signal_rej.Integral(), data_acc.Integral(),data_rej.Integral()))
+              xaxis = data_acc.GetXaxis().GetXbins()
+              min_bin = xaxis[0]
+              max_bin = xaxis[len(xaxis)-1]
+              n_bins  = len(xaxis)-1
 
-          print('XS={}: SIG PASS = {} SIG FAIL = {} BKG PASS = {} BKG FAIL = {}'.format(xs,signal_acc.Integral(),signal_rej.Integral(), data_acc.Integral(),data_rej.Integral()))
-          xaxis = data_acc.GetXaxis().GetXbins()
-          min_bin = xaxis[0]
-          max_bin = xaxis[len(xaxis)-1]
-          n_bins  = len(xaxis)-1
+              prefix = "q{}_xs{}_{}".format(quantile,xs,tag)
+              makeWS(data_rej,data_acc,signal_rej,signal_acc,'datacard_ws_{PREFIX}.root'.format(PREFIX=prefix),quantile)
 
-          prefix = "q{}_xs{}_{}".format(quantile,xs,tag)
-          makeWS(data_rej,data_acc,signal_rej,signal_acc,'datacard_ws_{PREFIX}.root'.format(PREFIX=prefix),quantile)
+        for xs in xsecs:
+            print("\nFor xsec={}:".format(xs) )
+            for key in quantiles:
+                print("For q = {}".format(key) )
+                quantile = int(key*100)
+                prefix = "q{}_xs{}_{}".format(quantile,xs,tag)
+                os.system('combine -M GoodnessOfFit --algo saturated --fixedSignalStrength 0 -d datacard_ws_{PREFIX}_ratio.txt -n Ratio_gof_{PREFIX} --dataset data_obs -v 2'.format(PREFIX=prefix))
 
-    for xs in xsecs:
-        print("\nFor xsec={}:".format(xs) )
-        for key in sorted(columns.keys()):
-            print("For q = {}".format(key) )
-            quantile = int(key*100)
-            prefix = "q{}_xs{}_{}".format(quantile,xs,tag)
-            os.system('combine -M GoodnessOfFit --algo saturated --fixedSignalStrength 0 -d datacard_ws_{PREFIX}_ratio.txt -n Ratio_gof_{PREFIX} --dataset data_obs -v 2'.format(PREFIX=prefix))
+                for i in range(1):
+                  os.system('combine -M GoodnessOfFit --algo saturated --fixedSignalStrength 0 -d datacard_ws_{PREFIX}_ratio.txt -t 200 --toysFreq -n Ratio_gof_toys_{PREFIX}  --dataset data_obs -s {S} -v 0'.format(PREFIX=prefix,S=40+i))
+                os.system('hadd -f higgsCombineRatio_gof_toys_{PREFIX}.GoodnessOfFit.mH120.ALLTOYS.root higgsCombineRatio_gof_toys_{PREFIX}.GoodnessOfFit.mH120.4*.root'.format(PREFIX=prefix))
 
-            for i in range(1):
-              os.system('combine -M GoodnessOfFit --algo saturated --fixedSignalStrength 0 -d datacard_ws_{PREFIX}_ratio.txt -t 200 --toysFreq -n Ratio_gof_toys_{PREFIX}  --dataset data_obs -s {S} -v 0'.format(PREFIX=prefix,S=40+i))
-            os.system('hadd -f higgsCombineRatio_gof_toys_{PREFIX}.GoodnessOfFit.mH120.ALLTOYS.root higgsCombineRatio_gof_toys_{PREFIX}.GoodnessOfFit.mH120.4*.root'.format(PREFIX=prefix))
+        for xs in xsecs:
+            print("\nxsec={}:\n".format(xs) )
+            for key in quantiles:
+                print("q = {}".format(key) )
+                quantile = int(key*100)
+                prefix = "q{}_xs{}_{}".format(quantile,xs,tag)
+                #import ipdb; ipdb.set_trace()
+                # open file
+                obs_gof_file = uproot.open('higgsCombineRatio_gof_{PREFIX}.GoodnessOfFit.mH120.root'.format(PREFIX=prefix))
+                obs_gof = obs_gof_file['limit'].arrays('limit')['limit'][0]
 
-    for xs in xsecs:
-        print("\nxsec={}:\n".format(xs) )
-        for key in sorted(columns.keys()):
-            print("q = {}".format(key) )
-            quantile = int(key*100)
-            prefix = "q{}_xs{}_{}".format(quantile,xs,tag)
-            # open file
-            obs_gof_file = uproot.open('higgsCombineRatio_gof_{PREFIX}.GoodnessOfFit.mH120.root'.format(PREFIX=prefix))
-            obs_gof = obs_gof_file['limit'].arrays('limit')['limit'][0]
 
-            
+                exp_gof_file = uproot.open('higgsCombineRatio_gof_toys_{PREFIX}.GoodnessOfFit.mH120.ALLTOYS.root'.format(PREFIX=prefix))
+                exp_gof = exp_gof_file['limit'].arrays('limit')['limit']
 
-            exp_gof_file = uproot.open('higgsCombineRatio_gof_toys_{PREFIX}.GoodnessOfFit.mH120.ALLTOYS.root'.format(PREFIX=prefix))
-            exp_gof = exp_gof_file['limit'].arrays('limit')['limit']
-            
-            print("Obs.   {:.1f}".format(obs_gof))
-            print("Exp.   {:.1f}\n".format(np.mean(exp_gof)))    
-          
-  if combineAll:
+                print("Obs.   {:.1f}".format(obs_gof))
+                print("Exp.   {:.1f}\n".format(np.mean(exp_gof)))    
+
+    f.Close()
+
+    if combineAll:
       for xs in xsecs:
         print("\nFor xsec={}:".format(xs) )
         os.system('combineCards.py q1=datacard_ws_q1_xs{XS}_ratio.txt q10=datacard_ws_q10_xs{XS}_ratio.txt q30=datacard_ws_q30_xs{XS}_ratio.txt q50=datacard_ws_q50_xs{XS}_ratio.txt q70=datacard_ws_q70_xs{XS}_ratio.txt q90=datacard_ws_q90_xs{XS}_ratio.txt &> combined_{XS}.txt'.format(XS=0))
