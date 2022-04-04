@@ -1,5 +1,7 @@
 # Goodness-of-fit tests for model-independent searches
 
+
+## Setup
 This code is based on J. Duartes script https://github.com/mpp-hep/JetAnomaly_CHEP19/Simple_combine.ipynb. It uses Higgs combine tool via CMSSW:
 
 ```
@@ -30,7 +32,7 @@ cmsenv
 cd ../../
 ```
 
-The script contains two almost identical scripts: One Jupyter notebook for illustrative purposes and quick checks, and one python script that can be imported and used in another script(WIP)
+### Using Jupyter on lxplus
 
 To run the notebook from lxplusABC
 ```
@@ -49,5 +51,7 @@ Note the port number XXXX and on your laptop do
 http://localhost:XXXX/?token=some-token
   ```
 and you should be in the notebook
-  
-Open gof.ipynb and work through the cells
+
+## How to run
+
+The package contains three scripts: one Jupyter notebook to produce the input histograms (where it is assumed that you have a signal and a QCD data file at hand), one that runs Combine based on the histogram root file output in the previous step, and a third notebook which plots the results from Combine.
