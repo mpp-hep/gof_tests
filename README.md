@@ -55,3 +55,31 @@ and you should be in the notebook
 ## How to run
 
 The package contains three scripts: one Jupyter notebook to produce the input histograms (where it is assumed that you have a signal and a QCD data file at hand), one that runs Combine based on the histogram root file output in the previous step, and a third notebook which plots the results from Combine.
+
+#### Step 1: Producing the histograms
+
+Execute each cell in the notebook prepare_histograms.ipynb.
+```
+ jupyter notebook prepare_histograms.ipynb
+```
+Take as input one QCD file and one signal file. Apply the neccassary selections to obtain histograms based on orthogonal quantiles and applies lumi scaling. Results in a file called histograms.root containing all neccessary histograms to feed to combine. It also does some nice ratio plots, where you can check the shape agreement between the different wuantiles
+
+
+#### Step 2: Run combine
+
+
+Run the script run_combine.py with python (2.7)
+```
+ python run_combine.py
+```
+
+This takes as input your histogram file from the previous steps, creates the datacards and runs the goodness-of-fit.
+
+#### Step 2:Plot the results
+
+Opens the root files and plots the results (the test statistics and p-value vs injecte xsec)
+```
+ jupyter notebook plot_results.ipynb
+```
+
+
