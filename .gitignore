@@ -3,4 +3,6 @@
 *.root
 *.txt
 *.out
+!histograms_injSig_PDinj_NA3p5.root
+CMS*
 
