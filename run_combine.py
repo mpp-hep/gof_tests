@@ -33,8 +33,8 @@ def makeWS(data_rej,data_acc,signal_rej,signal_acc, outname,quantile,qr_unc_file
   rej_bin_functions = rt.RooArgList()
   
   # Name efficiency per quantile to allow for combination
-  w.factory('eff_%s[%f]'%(quantile,efficiency))
-  w.var('eff_%s'%quantile).setConstant(True)
+  w.factory('eff_%s[%f,0,1]'%(quantile,efficiency))
+  w.var('eff_%s'%quantile).setConstant(False)
 
   
   empty_hist = rt.TH1D('empty_hist','empty_hist', data_rej.GetNbinsX(), data_rej.GetXaxis().GetXbins().GetArray())
@@ -150,7 +150,8 @@ if __name__ == "__main__":
   # Which quantiles to run GOF for
   #columns = {0.5: 21, 0.1: 18, 0.3: 22, 0.9: 17, 0.7: 20, 0.01: 19}
   # columns = {0.01: 19, 0.1: 18, 0.3: 22,0.5: 21, 0.7: 20}
-  columns = {0.01: 19, 0.1: 18, 0.3: 22,0.5: 21}
+  columns = {0.01: 19, 0.1: 18, 0.3: 22,0.5: 21, 0.7: 20}
+
   
   # RUn combine on all quantiles
   doAllQuantiles = True
@@ -159,9 +160,9 @@ if __name__ == "__main__":
   combineAll     = False
   
   # Informative name for the Combine outputs
-  tag = "sig_GtoWW35naReco"  
+  tag = "sig_CASE_Wkk"  
   
-  NTOYS = 5 # Multiplied by 10, running in a i=10 loop with different seed each time  
+  NTOYS = 100 # Multiplied by 10, running in a i=10 loop with different seed each time  
   if doAllQuantiles:
   
     for xs in xsecs:

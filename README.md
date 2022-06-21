@@ -62,7 +62,7 @@ Execute each cell in the notebook prepare_histograms.ipynb.
 ```
  jupyter notebook prepare_histograms.ipynb
 ```
-Take as input one QCD file and one signal file. Apply the neccassary selections to obtain histograms based on orthogonal quantiles and applies lumi scaling. Results in a file called histograms.root containing all neccessary histograms to feed to combine. It also does some nice ratio plots, where you can check the shape agreement between the different wuantiles
+Take as input one QCD/background/data file and one signal file. Apply the neccassary selections to obtain histograms based on orthogonal quantiles and applies lumi scaling. Results in a file called histograms.root containing all neccessary histograms to feed to combine. It also does some nice ratio plots, where you can check the shape agreement between the different wuantiles
 
 
 #### Step 2: Run combine
@@ -73,7 +73,7 @@ Run the script run_combine.py with python (2.7)
  python run_combine.py
 ```
 
-This takes as input your histogram file from the previous steps, creates the datacards and runs the goodness-of-fit.
+This takes as input your histogram file from the previous steps, creates the datacards and runs the goodness-of-fit for the data and for N toys. You need to define which crossection and which quantiles you want to run
 
 #### Step 2:Plot the results
 
